@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <meta charset="UTF-8">
+    <title>JGame AI UI</title>
+    <link rel="stylesheet" href="css/basestyles.css"></head>
+    <link rel="stylesheet" href="css/prism.css"></head>
+    <script type="text/javascript" src="lib/openai-bundle.js"></script>
+
+    <script type="text/javascript" src="lib/prism.js"></script>
+    <script type="text/javascript" src="lib/ZzFX/ZzFX.js"></script>
+    <script type="text/javascript" src="lib/ZzFX/zzfx_generate.js"></script>
+    <script type="text/javascript" src="lib/jgame/jgaudio.js"></script>
+
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #fafafa;
+            font-size: 18px;
+        }
+
+        .menu {
+            width: 100%;
+            /*height: 64px;*/
+            padding: 4px;
+            background: #fafafa;
+            color: #000;
+            box-sizing: border-box;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .menu-logo {
+            float: left;
+            width: 64px;
+            height: 52px;
+            background-image: url('../images/jgame-ai-logo-2-tr-64x52.png');
+            background-position: 0 50%;
+            background-repeat: no-repeat;
+            z-index: 100;
+        }
+        .layout {
+            display: flex;
+            flex-direction: row;
+            margin-top: 0;
+            min-height: calc(100vh - 64px);
+        }
+        .config-area {
+            width: 400px;
+            min-width: 180px;
+            padding: 20px 16px;
+            background: #eee;
+            border-right: 1px solid #ddd;
+            min-height: 400px;
+        }
+        .main-content {
+            flex: 1;
+            padding: 0px;
+            padding-left: 10px;
+            min-width: 0;
+            min-height: 400px;
+        }
+        /*@media (max-width: 700px) {
+            .layout {
+                flex-direction: column;
+            }
+            .config-area {
+                display: none;
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+        }*/
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+        #modal_dialog {
+            position: relative;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: fit-content;
+            max-height: 95%;
+            overflow: scroll;
+            min-width: 300px;
+        }
+    </style>
+    <script>
+    </script>
+</head>
+
+<body>
+    <div id="overlay">
+        <div id="modal_dialog">
+            Dialog
+        </div>
+    </div>
+    <div class="menu-logo" onclick="nw.Window.get().showDevTools();"></div>
+	  <div id="nav_bar" class="menu">
+    </div>
+    <div class="layout">
+        <div id="side_bar" class="config-area">
+        </div>
+        <div id="main" class="main-content">
+            Please select a page from the top menu.
+        </div>
+    </div>
+<script>
+    // simplest way to handle a "single page application"
+    window.addEventListener('beforeunload', function (event) {
+        event.preventDefault();
+        event.returnValue = '';
+    });
+    // mock classes for loading JGame modules
+    class GameEntity {
+        constructor(name,unique,tx,ty,mask,sprite) {}
+    }
+    class Particle {
+	      constructor(xpos,ypos,sprite,delay,size,color) {}
+    }
+</script>
+<script type="module">
+// start framework ----------------------------------
+import {AppCore} from "./js/app_core.js"
+import {WebServer} from "./js/webserver.js"
+
+var webserver=null;
+
+window.playSound = function(sound) {
+  JGAudio.load(sound.name,buildPresetSound(sound.seed,sound.type).samples,true)
+	JGAudio.play(sound.name,null,false,0.8)
+}
+window.showPopupMessage = function(message) {
+  alert(message)
+}
+
+function resetUI() {
+    core.unmountShadowDom("side_bar")
+    core.unmountShadowDom("main")
+    core.initModule("mainmenu")
+    document.getElementById("side_bar").style.display = "block"
+    document.getElementById('overlay').style.display = 'none';
+    if (webserver) {
+      webserver.close()
+      webserver = null
+    }
+    if (core.getWorkspaceDir()) {
+        webserver = new WebServer(core.getWorkspaceDir(),9876)
+        //core.initModule("globalsettings")
+    }
+}
+
+function router(route, params) {
+    console.log("Router received route request: "+route+" with params: "+JSON.stringify(params))
+    try {
+      if (route == "savegameassets") {
+        core.saveGameAssets()
+      } else if (route == "hide_modal_dialog") {
+        document.getElementById('overlay').style.display = 'none';
+      } else if (route == "workspace_opened") {
+        core.setWorkspaceDir(params.directory+"/")
+        core.initWorkspace()
+        resetUI(params.directory)
+      } else if (route == "workspace_created") {
+        var error = core.createWorkspace(params.directory+"/"+params.subdirectory+"/")
+        .then( (error) => {
+          if (error) {
+            alert(error)
+          } else {
+            core.initWorkspace()
+            resetUI()
+          }
+        })
+      } else if (route == "closeworkspace") {
+        core.setWorkspaceDir(null)
+        resetUI()
+      } else if (route == "editoptions" || route == "gradienteditor" || route=="viewmodulesource") {
+        // modal dialogs
+        document.getElementById('overlay').style.display = 'block';
+        core.initModule(route, params)
+      } else if (route == "spriteeditor" || route=="playgame" || route=="openworkspace" || route=="newworkspace"  || route=="globalsettings") {
+        // "fullscreen" modules
+        document.getElementById("side_bar").style.display = "none"
+        core.initModule(route, params)
+      } else {
+        // all other modules
+        document.getElementById("side_bar").style.display = "block"
+        document.getElementById('overlay').style.display = 'none';
+        core.initModule(route, params)
+      }
+    } catch (e) {
+        alert("Received error: "+e)
+        console.log(e.stack)
+        //core.initModule("login")
+        //document.getElementById('overlay').style.display = 'block';
+
+    }
+}
+function mounter(location, html_code, css_code) {
+    // just delegate to default implementation
+    return core.mountShadowDom(location,html_code,css_code)
+}
+var core = new AppCore(router,mounter,["css/prism.css","css/basestyles.css"])//,"C:/bvanschooten/JGAME.JS/jgame-ai-ui/WORK/jgame-games/ai-game/")
+//"C:/bvanschooten/JGAME.JS/jgame.js/jgame-games/ai-minimal-example-game/")
+//core.loadTranslations("i18n/nl_nl.json")
+async function init() {
+    await core.init()
+    //await core.loadModules(window.location.pathname.replace(/[^/]*$/, ''),"webcogs/promptbuildfile.json")
+    await core.loadModules(".","webcogs/promptbuildfile.json")
+    await resetUI()
+    //core.route("levels", {} )
+}
+init();
+</script>
+</body>
+</html>

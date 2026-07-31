@@ -1,0 +1,102 @@
+{
+	"webcogs_buildfile_version": 1,
+	"name": "JGame AI",
+	"description": "JGame AI",
+	"version": "0.1",
+	"ai_vendor": "openai",
+	"ai_model": "gpt-5.4",
+	"system_prompts": [
+		{ "text": "\n# Single Page Application core API\n\n", "file": "spa_core.md"},
+		{ "text": "\n# Single Page Application additional API functions\n\n", "file": "app_core.md"},
+		{ "text": "\n# Additional documentation\n\n", "file": "app_docs.md" },
+		{ "text": "\n# Base styles\n\n", "file": "../css/basestyles.css"}
+	],
+	"wd": "../js/generated/",
+	"targets": [
+		{
+			"name": "mainmenu",
+			"prompts": [ { "text": "Write a module that displays in nav_bar that shows a horizontal menu that routes to the different modules, based on getMenuItems(). Highlight menu items when clicked." } ],
+			"file": "mainmenu.js"
+		},
+		{
+			"name": "openworkspace",
+			"prompts": [ { "text": "Write a module that displays in main titled 'Open workspace', that enables the user to select a directory on the local file system using pickDirectory(). Once selected, it routes to workspace_opened with as parameter 'directory' the full path string." } ],
+			"file": "openworkspace.js"
+		},
+		{
+			"name": "newworkspace",
+			"prompts": [ { "text": "Write a module that displays in main titled 'New workspace', that enables the user to select a directory on the local file system using pickDirectory(). Once selected, it shows the selected directory with a field next to it for selecting a subdirectory, and a button 'Create workspace'. If the button is pressed, and the directory and subdirectory are filled in, it routes to workspace_created with as parameter 'directory' the full path string of the selected directory, and 'subdirectory' the filled in subdirectory." } ],
+			"file": "newworkspace.js"
+		},
+		{
+			"name": "editoptions",
+			"prompts": [ { "text": "Write a module that shows a modal dialog to edit options. Parameters are 'type', 'name', which indicate what to pass to getModuleOptions(), and 'store' which is an object containing an options property with option overrides, and where option changes should be stored. The default should be shown with each option, and if default is overridden, show the option background as light blue. Ensure decimals can be entered for numeric values. Only store options in the store that are not equal to the defaults. If the store contains options not listed by getModuleOptions, remove them. All changes should be saved in store immediately. Each option should be on a single line to save vertical space.  There is an OK button that routes to hide_modal_dialog." } ],
+			"file": "editoptions.js"
+		},
+		{
+			"name": "gradienteditor",
+			"prompts": [ { "text": "Write a module that shows a modal dialog to edit a CSS linear gradient, and previews it on a 480x270 canvas. It has a parameter 'store' that is an object containing a field 'bg' where the CSS gradient string is stored. The user can select the angle, colors, and stops of the gradient. Use the standard HTML color picker. All changes should be saved in store immediately. There is an OK button that routes to hide_modal_dialog." } ],
+			"file": "gradienteditor.js"
+		},
+		{
+			"name": "viewmodulesource",
+			"prompts": [ { "text": "Write a module that shows a modal dialog to view a module's source code using the prism library for syntax highlighting. Parameters are 'type' and 'name', which indicate what to pass to getModuleSourcePath(). Show a translucent static overlay at the top that shows the module name and path, and an OK button at the top that routes to hide_modal_dialog. Assume the prism library and CSS have already been loaded." } ],
+			"file": "viewmodulesource.js"
+		},
+		{
+			"name": "globalsettings",
+			"prompts": [ { "text": "Write a module that displays in main titles 'Game Settings', which shows 'Game Folder:' + core.getWorkspaceDir(), a 'Game Title' textfield, and a 'Game description' textarea, which should be filled with getGameTitle and getGameDescription results.  If the fields are changed, save them by calling setGameTitle/setGameDescription." } ],
+			"file": "globalsettings.js"
+		},
+		{
+			"name": "levels",
+			"prompts": [ { "text": "Write a module that displays in main which allows to edit levels.  The order of the levels can be arranged in the side_bar. For the options field, there should be an options button that routes to editoptions, with as parameters type='maps', name=[map name], and store=[the level object]. For the bg field, create a 'Edit gradient' button that routes to gradienteditor with as parameter 'store'=[the level object]. The win condition form should only show the relevant extra parameters for each type." } ],
+			"file": "levels.js"
+		},
+		{
+			"name": "globals",
+			"prompts": [ { "text": "A module that displays in main which allows to edit game globals." } ],
+			"file": "globals.js"
+		},
+		{
+			"name": "sprites",
+			"prompts": [ { "text": "Write a module that displays in main which allows to edit sprites. For the particle options, there should be an options button that routes to editoptions, with as parameters type='particles', name=[particle name], and store=[particle object]." } ],
+			"file": "sprites.js"
+		},
+		{
+			"name": "maps",
+			"prompts": [ { "text": "Write a module that displays in main which allows to edit maps. This includes editing the map name, the prompt in a textarea, and selecting the used map chars from the list of characters defined in the tile mapping. Each character in the list should show if it is an entity or a tile, with the name of the corresponding entity or tile mask. Call setMap on any change to the map form to ensure it is saved.  Add a build button above the character list to build a map using buildModule(...). Add a view source button that routes to viewmodulesource with as parameters type='maps' and name=[name of the map]." } ],
+			"file": "maps.js"
+		},
+		{
+			"name": "entities",
+			"prompts": [ { "text": "Write a module that displays in main which allows to edit entities. The prompt should be editable in a textarea.  Call setEntity on any change to the entity form to ensure it is saved. Add a build button to build an entity using buildModule(...). Add a view source button that routes to viewmodulesource with as parameters type='entities' and name=[name of the entity]. " } ],
+			"file": "entities.js"
+		},
+		{
+			"name": "particles",
+			"prompts": [ { "text": "Write a module that displays in main which allows to edit particle generators. The prompt should be editable in a textarea. Call setParticle on any change to the entity form to ensure it is saved. Add a build button to build a particle using buildModule(...). Add a view source button that routes to viewmodulesource with as parameters type='particles' and name=[name of the particle generator]." } ],
+			"file": "particles.js"
+		},
+		{
+			"name": "tilemappings",
+			"prompts": [ { "text": "Write a module that displays in main which allows to edit tile mappings. When selecting an entity, set the unique property to checked. For the entity options and particle options, there should be an options button that routes to editoptions, with as parameters type=['entities' or 'particles'], name=[entity or particle name], and store=[entity or particle object]." } ],
+			"file": "tilemappings.js"
+		},
+		{
+			"name": "sounds",
+			"prompts": [ { "text": "Write a module that displays in main which allows to edit sounds. Provide a play sound button that calls playSound, and a button 'randomize seed', which inserts a 7-digit integer in the seed field, and also plays the sound via playSound." } ],
+			"file": "sounds.js"
+		},
+		{
+			"name": "spriteeditor",
+			"prompts": [ { "text": "Write a module that displays in main, which shows an iframe that loads the URL provided by getSpriteEditor()." } ],
+			"file": "spriteeditor.js"
+		},
+		{
+			"name": "playgame",
+			"prompts": [ { "text": "Write a module that displays in main, which shows an iframe that loads the URL provided by getGameUrl(). Ensure the iframe content fits in the window." } ],
+			"file": "playgame.js"
+		}
+	]
+}

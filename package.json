@@ -1,0 +1,22 @@
+{
+	"name": "jgame-ai-ui",
+	"main": "index.html",
+	"window": {
+		"title": "JGame AI",
+		"width": 1400,
+		"height": 800,
+		"resizable": true
+	},
+	"scripts": {
+		"start": "nw .",
+		"gen-docs": "jsdoc2md --param-list-format list --property-list-format list js/spa_core.js >webcogs/spa_core.md && jsdoc2md --param-list-format list --property-list-format list js/app_core.js >webcogs/app_core.md"
+	},
+	"dependencies": {
+		"nw": "^0.110.1",
+		"openai": "^5.1.1",
+		"unzipper": "^0.12.3"
+	},
+	"devDependencies": {
+		"jsdoc-to-markdown": "^9.1.3"
+	}
+}

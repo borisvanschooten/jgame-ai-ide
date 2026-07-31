@@ -1,0 +1,118 @@
+:root {
+  --text-color: #000;
+  --main-bg-color: #fff;
+  --button-bg-color: #bbf;
+  --button-text-color: #006;
+  --highlight-bg-color: #fcc;
+  --mainmenu-item-selected-bg-color: #88f;
+  /* Colors for list items in the side_bar lists */
+  --list-item-border-color: #999;
+  --list-item-bg-color: #ddd;
+  --list-item-selected-bg-color: #b0c0ff;
+}
+body {
+	margin: 0;
+	padding: 0;
+	font-size: 16px;
+}
+
+/* Use UL/LI with the following classes for mainmenu */
+ul.mainmenu {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+  margin: 8px;
+  padding: 0px;
+  padding-left: 15px;
+  /*background-image: url('../images/jgame-ai-logo-2-tr-64x52.png');
+  background-repeat: no-repeat;
+  background-position: 0% 50%;*/
+}
+li.mainmenu-item {
+  cursor: pointer;
+  padding: 10px 5px;
+  user-select: none;
+  color: #fff;
+}
+
+input[type="text"], input[type="number"], select {
+	font-size: 16px;
+	padding: 6px;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.3);
+	margin-right: 8px;
+}
+
+button {
+	font-size: 16px;
+	padding: 8px 12px;
+	cursor: pointer;
+}
+
+/* Use the .side-bar-list and .item styles below to style side_bar lists and items */
+.side-bar-list {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.item {
+	padding-left: 8px;
+	padding-right: 8px;
+	padding-top: 8px;
+	padding-bottom: 6px;
+	border: 1px solid var(--list-item-border-color);
+	cursor: pointer;
+	background: var(--list-item-bg-color);
+}
+.item.selected {
+	background: var(--list-item-selected-bg-color);
+}
+.item-name {
+	float: left;
+	font-size: 14px;
+	font-weight: bold;
+	margin-bottom: 4px;
+	padding-right: 15px;
+	word-break: break-word;
+}
+.item-summary {
+	float: left;
+	font-size: 14px;
+	margin-bottom: 4px;
+	word-break: break-word;
+}
+.item-actions {
+	float: right;
+	display: flex;
+	gap: 4px;
+	flex-wrap: wrap;
+}
+.item-actions button {
+	font-size: 10px;
+	padding: 2px 2px;
+}
+/* use for copy/duplicate button */
+.item-actions button.duplicate {
+	content: "📋";
+}
+/* use for delete button */
+.item-actions button.delete {
+	content: "🗑️";
+}
+/* In the maps screen, use the following styles to show the map's used map char selection list, and minimize vertical space. */
+span.usedmapchars-char {
+	font-size: 16px;
+	font-weight: bold;
+	font-family: monospace;
+}
+span.usedmapchars-description {
+	font-size: 16px;
+	padding-left: 15px;
+}
+/* style for primsjs code */
+code[class*="language-"], pre[class*="language-"] {
+    white-space: pre-wrap;
+	font-size: 14px;
+}
