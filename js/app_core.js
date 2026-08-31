@@ -138,22 +138,54 @@ class AppCore extends SPACore {
 			await this.loadModules(this.basedir, this.basedir+"webcogs/promptbuild_particles.json", this.particleModules)
 			localStorage.setItem("tmtg.net.TinyPixelEditor.0",await this.loadAsDataURL(this.basedir+"images/spritesheet.png"));
 			// force dimensions in sprite editor
-			var config = {
-				tilex: 10,
-				tiley: 10,
-				nrtilesx: 10,
-				nrtilesy: 10,
-			}
-			localStorage.setItem("tmtg.net.TinyPixelEditor.config", JSON.stringify(config))
+			//var config = {
+			//	tilex: 10,
+			//	tiley: 10,
+			//	nrtilesx: 10,
+			//	nrtilesy: 10,
+			//}
+			//localStorage.setItem("tmtg.net.TinyPixelEditor.config", JSON.stringify(config))
 			var gamesrc = await this.loadTextFile(this.basedir+"game.js")
 			var gamesettings = this.parseGameInit(gamesrc)
+			var spritedims = this.parseGameSpriteDims(gamesrc)
 			this.setGameTitle(gamesettings.title)
 			this.setGameDescription(gamesettings.description)
+			this.setSpriteEditorDims(spritedims)
 		} catch (err) {
-			// failed to load files, clear workspace folder
-			this.basedir = null;
+			console.error(`Error initing workspace:`)
+			console.error(err)
+			// failed to load files -> clear workspace + basedir folder, reload UI?
 		}
 	}
+	/** @private */
+	getSpriteEditorDims() {
+		var ret = {unitx:10, unity:10, countx:10, county:10}
+		var editorconfig = JSON.parse(localStorage.getItem("tmtg.net.TinyPixelEditor.config"))
+		if (editorconfig) {
+			ret.unitx = editorconfig.tilex ?? 10
+			ret.unity = editorconfig.tiley ?? 10
+			ret.countx = editorconfig.nrtilesx ?? 10
+			ret.county = editorconfig.nrtilesy ?? 10
+		}
+		return ret
+	}
+
+	/** @private */
+	setSpriteEditorDims(spritedims) {
+		var editorconfig = localStorage.getItem("tmtg.net.TinyPixelEditor.config")
+		if (editorconfig) {
+			editorconfig = JSON.parse(editorconfig)
+		} else {
+			editorconfig = {}
+		}
+		editorconfig.tilex = spritedims.unitx;
+		editorconfig.tiley = spritedims.unity;
+		editorconfig.nrtilesx = spritedims.countx;
+		editorconfig.nrtilesy = spritedims.county;
+		localStorage.setItem("tmtg.net.TinyPixelEditor.config",
+			JSON.stringify(editorconfig) )
+	}
+
 	/** @private
 	 * @param {string} path  path to extract template into, with trailing slash
 	 * @return {string} error message or false if no error
@@ -179,6 +211,7 @@ class AppCore extends SPACore {
 	}
 	/** @private */
 	setWorkspaceDir(dir) {
+		console.log(`>>> Setting workspace dir to ${dir}.`)
 		if (dir) {
 			localStorage.setItem("borisvanschooten.jgame-ai-ui.workspace", dir);
 		} else {
@@ -269,6 +302,10 @@ class AppCore extends SPACore {
 	}
 	/** @private */
 	async saveGameAssets() {
+		if (!this.basedir) {
+			alert("Cannot save, basedir not defined!")
+			return
+		}
 		this.saveJSON(this.basedir+"globals.json",this.globals)
 		this.saveJSON(this.basedir+"levels.json",this.levels)
 		this.saveJSON(this.basedir+"tilemapping.json",this.tilemapping)
@@ -280,8 +317,10 @@ class AppCore extends SPACore {
 		this.savePngDataUrl(localStorage.getItem("tmtg.net.TinyPixelEditor.0"), this.basedir+"images/spritesheet.png")
 		var gamesrc = await this.loadTextFile(this.basedir+"game.js")
 		gamesrc = this.updateGameInit(gamesrc, this.getGameTitle(), this.getGameDescription())
+		gamesrc = this.updateGameSpriteDims(gamesrc, this.getSpriteEditorDims())
 		this.saveTextFile(this.basedir+"game.js",gamesrc)
 	}
+
 	/** Plays a given sound.
 	 * @param {string} name - the name of the sound
 	 */
@@ -365,21 +404,31 @@ class AppCore extends SPACore {
 	 * @return {HTMLElement} an img element showing the sprite
 	 */
 	getSpriteIndexImg(spriteIndex,size) {
-		const spritesPerRow = 10;
-		const spriteSize = 10;
-		var scale = 2;
-		if (size == "large") scale=3;
-		const x = (spriteIndex % spritesPerRow) * spriteSize;
-		const y = Math.floor(spriteIndex / spritesPerRow) * spriteSize;
+		var spritedims = this.getSpriteEditorDims()
+		const spritesPerRow = spritedims.countx;
+		const spriteXSize = spritedims.unitx;
+		const spriteYSize = spritedims.unity;
+		// originally, for 10x10, normal size -> scale 2, large size -> scale 3
+		var scale = 2
+		var imageRendering = 'pixelated'
+		if (spriteYSize > 24) {
+			scale = 24/spriteYSize
+			imageRendering = 'smooth'
+		} else if (spriteYSize > 12) { // 12-24
+			scale = 1
+		}
+		if (size == "large") scale *= 1.5;
+		const x = (spriteIndex % spritesPerRow) * spriteXSize;
+		const y = Math.floor(spriteIndex / spritesPerRow) * spriteYSize;
 		// size and pos offset by a small amount to avoid interpolation artifacts
 		const img = document.createElement("img");
 		img.src = localStorage.getItem("tmtg.net.TinyPixelEditor.0");
-		img.style.width = `${spriteSize-0.2}px`;
-		img.style.height = `${spriteSize-0.2}px`;
+		img.style.width = `${spriteXSize-0.2}px`;
+		img.style.height = `${spriteYSize-0.2}px`;
 		img.style.objectFit = "none";
 		img.style.objectPosition = `-${x+0.1}px -${y+0.1}px`;
 		
-		img.style.imageRendering = "pixelated";
+		img.style.imageRendering = imageRendering;
 		img.style.transform = `scale(${scale})`;
 		img.style.transformOrigin = "center center";
 
@@ -443,7 +492,7 @@ class AppCore extends SPACore {
 			onRemove: { particle: [particle parameters], sound: [name of sound] },
 		}
 	 * anim.mode is one of: "always", "moving", and "moving-x".
-	 * anim.dir is one of: "nodir", "rotany", "rot4", "mirx", "miry", "rot-mir".
+	 * anim.dir is one of: "nodir", "rotany", "rot4", "mirx", "miry", "rot-mir", "copy".
 	 * onCreate and onRemove are optional, their properties particle and sound are also optional.
 	 * The particle property is an object with the following properties: { type: [name of particle function], size: [particle size], sprite: [spritesheet index], options: [options object] }
 	 * @return {object} sprite definitions
@@ -1360,6 +1409,75 @@ class AppCore extends SPACore {
         );
 
         return result;
+    }
+	/* @cogs_endfunc */
+
+	/** @private
+	 * @cogs_func parseGameSpriteDims
+	 * Create a method parseGameSpriteDims(src) that scans a config string for the following patterns:
+	 *  'GameConfig.spritesheet.unitx = [integer]'
+	 *  'GameConfig.spritesheet.unity = [integer]'
+	 *  'GameConfig.spritesheet.countx = [integer]'
+	 *  'GameConfig.spritesheet.county = [integer]'
+	 * It returns the integer values found. If one or more values are not found, use the following defaults:
+	 * {unitx:10, unity:10, countx:10, county:10}
+	 * @return {object} an object with the structure {unitx,unity,countx,county}
+	 */
+//@cogs_build 0.7.0 openai-gpt-5.5 2026-08-02T18:18:46.956Z
+    parseGameSpriteDims(src) {
+        const defaults = {
+            unitx: 10,
+            unity: 10,
+            countx: 10,
+            county: 10
+        };
+        const result = { ...defaults };
+        const text = String(src || "");
+
+        Object.keys(defaults).forEach((key) => {
+            const pattern = new RegExp("GameConfig\\.spritesheet\\." + key + "\\s*=\\s*(-?\\d+)");
+            const match = text.match(pattern);
+
+            if (match) {
+                result[key] = parseInt(match[1], 10);
+            }
+        });
+
+        return result;
+    }
+	/* @cogs_endfunc */
+
+	/** @private
+	 * @cogs_func updateGameSpriteDims
+	 * Create a method updateGameSpriteDims(src,values) that scans a config string for the following patterns:
+	 *  'GameConfig.spritesheet.unitx = [integer]'
+	 *  'GameConfig.spritesheet.unity = [integer]'
+	 *  'GameConfig.spritesheet.countx = [integer]'
+	 *  'GameConfig.spritesheet.county = [integer]'
+	 *  'GameConfig.tilemap.unitx = [integer]'
+	 *  'GameConfig.tilemap.unity = [integer]'
+	 *  'GameConfig.tilemap.countx = [integer]'
+	 *  'GameConfig.tilemap.county = [integer]'
+	 * If a pattern is found, insert the corresponding value from values in place of the [integer].
+	 * If a pattern is not found, skip.
+	 * @param {string} src - the config string
+	 * @param {object} values - an object with the properties {unitx,unity,countx,county}
+	 * @return {string} - the modified config string
+	 */
+//@cogs_build 0.7.0 openai-gpt-5.5 2026-08-02T18:19:51.303Z
+    updateGameSpriteDims(src, values) {
+		console.log(`###########`)
+		console.log(values)
+        const replacements = {
+            unitx: values.unitx,
+            unity: values.unity,
+            countx: values.countx,
+            county: values.county
+        };
+
+        return String(src).replace(/(GameConfig\.(?:spritesheet|tilemap)\.(unitx|unity|countx|county)\s*=\s*)-?\d+/g, (match, prefix, key) => {
+            return prefix + replacements[key];
+        });
     }
 	/* @cogs_endfunc */
 

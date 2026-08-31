@@ -113,7 +113,8 @@ AppCore is the SPACore subclass used for this application. It contains extra met
 <a name="new_AppCore_new"></a>
 
 ### new AppCore()
-Do not construct this class, but use the existing instance.basedir should include trailing slash.
+Do not construct this class, but use the existing instance.
+basedir should include trailing slash.
 
 <a name="AppCore+getWorkspaceDir"></a>
 
@@ -236,10 +237,16 @@ Get the option parameters of a given module.
 <a name="AppCore+getLevels"></a>
 
 ### appCore.getLevels() ⇒ <code>array</code>
-Return editable level definitions. This is an array of objects with the following properties:name: the name of the level type: the level type, which is the name of a map generator,tilemap: width and height of the tile map, given by an object { "nrtilesx": width, "nrtilesy": height}. Minimum width is 32. Minimum height is 18.bg: name of the background texturewincond: The level's win condition. This is an object { type: [type of win condition], position: [optional position name], mask: [optional tile mask name] }.
+Return editable level definitions. This is an array of objects with the following properties:
+name: the name of the level 
+type: the level type, which is the name of a map generator,
+tilemap: width and height of the tile map, given by an object { "nrtilesx": width, "nrtilesy": height}. Minimum width is 32. Minimum height is 18.
+bg: name of the background texture
+wincond: The level's win condition. This is an object { type: [type of win condition], position: [optional position name], mask: [optional tile mask name] }.
 	           Type is one of: "no_enemies", "no_pickups", "no_tiles_with_mask", or "player_reaches".
 			   For no_tiles_with_mask, the mask parameter has to be supplied, which is the tile mask name
-			   For player_reaches, the position parameter has to be supplied, which can be one of: "top", "bottom", "left", "right".options: an options object containing key-value pairs, which are numbers, strings, or booleans.
+			   For player_reaches, the position parameter has to be supplied, which can be one of: "top", "bottom", "left", "right".
+options: an options object containing key-value pairs, which are numbers, strings, or booleans.
 
 **Kind**: instance method of [<code>AppCore</code>](#AppCore)  
 **Returns**: <code>array</code> - level definitions
@@ -247,7 +254,15 @@ Return editable level definitions. This is an array of objects with the followin
 <a name="AppCore+getGlobals"></a>
 
 ### appCore.getGlobals() ⇒ <code>array</code>
-Return editable game globals definitions. This is an array of objects with the following properties:name: the name of the global type: the globals' type, which is 'int' or 'float'value: the initial valuemin: numeric minimum valuemax: numeric maximum valuedisplay: the global's display method: 'none', 'bar', 'count', or 'number'label: a label string to show next to the displaysprite: integer sprite index to use for display
+Return editable game globals definitions. This is an array of objects with the following properties:
+name: the name of the global 
+type: the globals' type, which is 'int' or 'float'
+value: the initial value
+min: numeric minimum value
+max: numeric maximum value
+display: the global's display method: 'none', 'bar', 'count', or 'number'
+label: a label string to show next to the display
+sprite: integer sprite index to use for display
 
 **Kind**: instance method of [<code>AppCore</code>](#AppCore)  
 **Returns**: <code>array</code> - game global definitions
@@ -255,12 +270,18 @@ Return editable game globals definitions. This is an array of objects with the f
 <a name="AppCore+getSprites"></a>
 
 ### appCore.getSprites() ⇒ <code>object</code>
-Return editable sprite definitions. This is an object with as keys the currently defined sprite names, and as values the sprite definitions.The sprite defintions are objects with the following structure: {
+Return editable sprite definitions. This is an object with as keys the currently defined sprite names, and as values the sprite definitions.
+The sprite defintions are objects with the following structure:
+ {
 			spawnDelay: [integer delay before spawning],
     		anim: { start:[start sprite index], end:[end sprite index], speed:[animation speed, between 0 and 1], mode:[animation mode], dir:[animation direction] },
 			onCreate: { particle: [particle parameters], sound: [name of sound] },
 			onRemove: { particle: [particle parameters], sound: [name of sound] },
-		}anim.mode is one of: "always", "moving", and "moving-x".anim.dir is one of: "nodir", "rotany", "rot4", "mirx", "miry", "rot-mir".onCreate and onRemove are optional, their properties particle and sound are also optional.The particle property is an object with the following properties: { type: [name of particle function], size: [particle size], sprite: [spritesheet index], options: [options object] }
+		}
+anim.mode is one of: "always", "moving", and "moving-x".
+anim.dir is one of: "nodir", "rotany", "rot4", "mirx", "miry", "rot-mir".
+onCreate and onRemove are optional, their properties particle and sound are also optional.
+The particle property is an object with the following properties: { type: [name of particle function], size: [particle size], sprite: [spritesheet index], options: [options object] }
 
 **Kind**: instance method of [<code>AppCore</code>](#AppCore)  
 **Returns**: <code>object</code> - sprite definitions  
@@ -269,20 +290,29 @@ Return editable sprite definitions. This is an object with as keys the currently
 ### appCore.getTileMapping() ⇒ <code>object</code>
 **Kind**: instance method of [<code>AppCore</code>](#AppCore)  
 **Returns**: <code>object</code> - tile mapping definitions  
-**Cogs_func**: getTileMappingReturns editable tile mapping definitions. This is an object with as keys one-character strings that represent map symbols, and as values objects that represent tile and optionally entity definitions.A tile definition looks like this:
+**Cogs_func**: getTileMapping
+Returns editable tile mapping definitions. This is an object with as keys one-character strings that represent map symbols, and as values objects that represent tile and optionally entity definitions.
+A tile definition looks like this:
 	   {
 	       tile: [spritesheet index],
 	       mask_name: [a string representing the tile mask],
 	       onRemove: { particle: [particle parameters], sound: [name of sound] },
-	   }onRemove is optional, their properties particle and sound are also optional.The particle property is an object with the following properties: { type: [name of particle function], size: [particle size], sprite: [spritesheet index], options: [options object] }Additionally, an entity can be defined, which looks like this:
+	   }
+onRemove is optional, their properties particle and sound are also optional.
+The particle property is an object with the following properties: { type: [name of particle function], size: [particle size], sprite: [spritesheet index], options: [options object] }
+
+Additionally, an entity can be defined, which looks like this:
 	   {
 	       entity: { name: [name of entity class], unique:[boolean], mask: [entity mask name], sprite: [name of the sprite, as defined in the result of getSprites()], options: [options object] } 
-	   }mask is one of: "player", "player_bullet", "enemy", "enemy_bullet", "pickup", "special".  
+	   }
+mask is one of: "player", "player_bullet", "enemy", "enemy_bullet", "pickup", "special".  
 <a name="AppCore+getSounds"></a>
 
 ### appCore.getSounds() ⇒ <code>object</code>
-Returns editable sound definitions. This is an object with the property "sounds" which is an array of sound definitions.A sound definitions looks like this:
-	   { name: [name of sound], type: [sound type], "seed": [integer random seed] }type is one of: 'Random', 'Pickup','Powerup','Jump','Shoot','Blip','Hit','Explo'.
+Returns editable sound definitions. This is an object with the property "sounds" which is an array of sound definitions.
+A sound definitions looks like this:
+	   { name: [name of sound], type: [sound type], "seed": [integer random seed] }
+type is one of: 'Random', 'Pickup','Powerup','Jump','Shoot','Blip','Hit','Explo'.
 
 **Kind**: instance method of [<code>AppCore</code>](#AppCore)  
 **Returns**: <code>object</code> - sound definitions  
@@ -814,7 +844,7 @@ export class TileMappingsEditor {
     this.fillSelect(particleSelect, Object.keys(this.particles).sort());
     this.fillSelect(entitySelect, Object.keys(this.entities).sort());
     this.fillSelect(entitySprite, Object.keys(this.sprites).sort());
-    this.fillSelect(entityMask, ['player', 'player_bullet', 'enemy', 'enemy_bullet', 'pickup', 'special'], false);
+    this.fillSelect(entityMask, ['none', 'player', 'player_bullet', 'enemy', 'enemy_bullet', 'pickup', 'special'], false);
   }
 
   fillSelect(select, values, includeEmpty = true) {
