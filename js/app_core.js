@@ -344,7 +344,7 @@ class AppCore extends SPACore {
 	 */
 	getGameUrl() {
 		this.saveGameAssets()
-		return "http://localhost:9876/jgame-ai.html"
+		return "http://localhost:9876/index.html"
 	}
 	/** Get the path of the source code of a module.
 	 * @async
